@@ -1,26 +1,22 @@
-package part1;
+package part1.multi_job_version;
 
 import helpers.MapHelper;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.IOException;
 
-public class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
-    private Map<Text, IntWritable> count = new HashMap<>();
+public class SecondJobReduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+    private java.util.Map<Text, IntWritable> count = new HashMap<>();
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-        int revisions = 0;
-
         for (IntWritable value : values) {
-            revisions += value.get();
+            count.put(new Text(key), new IntWritable(value.get()));
         }
-
-        count.put(new Text(key), new IntWritable(revisions));
     }
 
     @Override
