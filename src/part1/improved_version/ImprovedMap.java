@@ -14,6 +14,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class to implement a mapper for the MapReduce job.
+ * The mapper takes a line and its content as an input and
+ * makes use of an in-memory HashMap to store the user id
+ * and the number of revisions of that user.
+ */
 public class ImprovedMap extends Mapper<LongWritable, Text, Text, IntWritable> {
     private Map<Text, IntWritable> count = new HashMap<>();
 
@@ -35,9 +41,11 @@ public class ImprovedMap extends Mapper<LongWritable, Text, Text, IntWritable> {
                 Text user = new Text(userId);
 
                 if (revisionTimestamp.after(timestamp1) && revisionTimestamp.before(timestamp2)) {
+                    // If the user has already been encountered, increase the number of revisions
                     if (count.containsKey(user)){
                         count.put(user, new IntWritable(count.get(user).get() + 1));
                     }
+                    // Otherwise, set the number of revisions to 1.
                     else {
                         count.put(user, new IntWritable(1));
                     }
@@ -48,9 +56,12 @@ public class ImprovedMap extends Mapper<LongWritable, Text, Text, IntWritable> {
         }
     }
 
+    /**
+     * After all the data has been collected and the HashMap is complete, output its contents to
+     * the reducer.
+     */
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-
         for (Text key: count.keySet()) {
             context.write(new Text(key), new IntWritable(count.get(key).get()));
         }

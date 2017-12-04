@@ -11,7 +11,11 @@ import org.apache.hadoop.util.ToolRunner;
 import part1.first_version.Main;
 import part1.first_version.Reduce;
 
-// creates a job process that is submitted to the hadoop environment
+/**
+ * Class that creates a job process that is submitted to the hadoop environment
+ * Run: WikiReduce.jar part1.improved_version.ImprovedMain N timestamp1 timestamp2 input
+ * final-output
+ */
 public class ImprovedMain extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
@@ -25,25 +29,21 @@ public class ImprovedMain extends Configured implements Tool {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        //"2005-12-06T17:44:47Z"
-        job.getConfiguration().set("timestamp1", "2005-12-06T17:44:47Z");
-        //"2006-03-24T02:14:46Z"
-        job.getConfiguration().set("timestamp2", "2006-03-24T02:14:46Z");
-        job.getConfiguration().set("N-value", "10");
+        // Set configuration attributes based on arguments from the user
+        job.getConfiguration().set("N-value", args[0]);
+        job.getConfiguration().set("timestamp1", args[1]);
+        job.getConfiguration().set("timestamp2", args[2]);
 
 
         job.setMapperClass(ImprovedMap.class);
         job.setReducerClass(Reduce.class);
-//        job.setCombinerClass(ImprovedCombiner.class);
-        job.setNumReduceTasks(1);
+//        job.setCombinerClass(Reduce.class);
 
         Path inputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/input" +
-                        "/wiki.txt");
+                (args[3]);
 
         Path outputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/output" +
-                        "/part1_improved-version");
+                (args[4]);
 
         FileInputFormat.addInputPath(job, inputFilePath);
         FileOutputFormat.setOutputPath(job, outputFilePath);

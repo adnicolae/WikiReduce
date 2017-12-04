@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class to implement the second reducer in a chained job.
+ * It parses the files from the first reducer send through the second mapper
+ * and outputs the top N results.
+ */
 public class SecondJobReduce extends Reducer<Text, IntWritable, Text, IntWritable> {
     private java.util.Map<Text, IntWritable> count = new HashMap<>();
 

@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class to implement HashMap sorting by key and by value.
+ */
 public class MapHelper {
     public static <K, V extends Comparable<? super V>> java.util.Map<K, V> sortByValue(java.util
                                                                                           .Map<K, V> map) {

@@ -3,6 +3,7 @@ package part1.multi_job_version;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -12,6 +13,11 @@ import org.apache.hadoop.util.ToolRunner;
 import part1.first_version.Reduce;
 import part1.improved_version.ImprovedMap;
 
+/**
+ * Class that creates a multi job process that is submitted to the hadoop environment
+ * Run: WikiReduce.jar part1.multi_job_version.MultiJobMain N timestamp1 timestamp2 input
+ * intermediate-output final-output
+ */
 public class MultiJobMain extends Configured implements Tool {
 
     public int run(String[] args) throws Exception {
@@ -24,53 +30,53 @@ public class MultiJobMain extends Configured implements Tool {
         j1.setReducerClass(Reduce.class);
         j1.setPartitionerClass(Partition.class);
 
-        j1.setNumReduceTasks(4);
+        // Set the number of reducers for this tasks, for testing purposes
+        j1.setNumReduceTasks(6);
 
-        //"2005-12-06T17:44:47Z"
-        //2007-01-05T14:44:47Z
-        j1.getConfiguration().set("timestamp1", "2005-12-06T17:44:47Z");
-        //"2006-03-24T02:14:46Z"
-        //2008-01-05T14:48:05Z
-        j1.getConfiguration().set("timestamp2", "2006-03-24T02:14:46Z");
-        j1.getConfiguration().set("N-value", "10");
+        // Set configuration attributes based on terminal arguments
+        j1.getConfiguration().set("N-value", args[0]);
+        j1.getConfiguration().set("timestamp1", args[1]);
+        j1.getConfiguration().set("timestamp2", args[2]);
 
         j1.setOutputKeyClass(Text.class);
         j1.setOutputValueClass(IntWritable.class);
 
+        // Set the input and intermediate file paths
         Path inputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/input" +
-                        "/wiki.txt");
+                (args[3]);
 
-        Path outputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/output" +
-                        "/part1_multijob-version-intermediate");
+        Path intermediateFilePath = new Path
+                (args[4]);
 
         FileInputFormat.addInputPath(j1, inputFilePath);
-        FileOutputFormat.setOutputPath(j1, outputFilePath);
+        FileOutputFormat.setOutputPath(j1, intermediateFilePath);
 
+        // Wait for the first job to complete before starting the second job
         j1.waitForCompletion(true);
 
-
+        /**
+         * Job 2 configuration
+         */
         Configuration conf2=new Configuration();
         Job j2=Job.getInstance(conf2);
 
         j2.setJarByClass(MultiJobMain.class);
 
-        j2.getConfiguration().set("N-value", "10");
+        // Set the configuration attributes for the second job
+        j2.getConfiguration().set("N-value", args[0]);
 
+        // Set the Mapper and Reducer for the second job
         j2.setMapperClass(SecondJobMap.class);
         j2.setReducerClass(SecondJobReduce.class);
-
-        j2.setNumReduceTasks(1);
 
         j2.setOutputKeyClass(Text.class);
         j2.setOutputValueClass(IntWritable.class);
 
+        // Set the final output path
         Path finalOutputPath=new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/output" +
-                        "/part1_multijob-version-final");
+                (args[5]);
 
-        FileInputFormat.addInputPath(j2, outputFilePath);
+        FileInputFormat.addInputPath(j2, intermediateFilePath);
         FileOutputFormat.setOutputPath(j2, finalOutputPath);
 
         finalOutputPath.getFileSystem(conf2).delete(finalOutputPath, true);

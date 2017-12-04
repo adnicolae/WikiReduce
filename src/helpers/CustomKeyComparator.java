@@ -4,12 +4,18 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Comparator;
 
+/**
+ * A custom Comparator that compares based on the type of input,
+ * as the user_id can either be a numerical value, an IP address or
+ * a string in the case of administrators.
+ */
 public class CustomKeyComparator implements Comparator<String> {
     @Override
     public int compare(String first, String second) {
         try {
             Integer firstInt = Integer.parseInt(first);
             Integer secondInt = Integer.parseInt(second);
+            // Compare user id numerical values
             int cmp = firstInt.compareTo(secondInt);
 
             if (cmp != 0){
@@ -24,13 +30,15 @@ public class CustomKeyComparator implements Comparator<String> {
 
             IPAddressComparator comp = new IPAddressComparator();
 
+            // Compare IP Addresses
             return comp.compare(ip1, ip2);
         }
         catch (NumberFormatException|UnknownHostException e) {
-            System.err.println("The user_id cannot be mapped to a numerical or ip " +
-                    "value: " + e.getMessage());
+            System.err.println("The user_id cannot be mapped to a numerical value. It will map to" +
+                    " an IP or a String." + e.getMessage
+                    ());
         }
-
+        // Compare administrators (string)
         return first.compareTo(second);
     }
 }

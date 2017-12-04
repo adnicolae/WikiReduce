@@ -8,10 +8,14 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+/**
+ * Class to implement a mapper for the MapReduce job.
+ * The mapper takes a line and its content as an input and
+ * outputs the user id found on the "REVISION" line and the number 1
+ * to represent one revision of that user id.
+ */
 public class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -29,6 +33,7 @@ public class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
                 Date timestamp1 = simpleDateFormat.parse(configuration.get("timestamp1"));
                 Date timestamp2 = simpleDateFormat.parse(configuration.get("timestamp2"));
 
+                // Check if the timestamp of the current revision is within the given timestamps
                 if (revisionTimestamp.after(timestamp1) && revisionTimestamp.before(timestamp2)) {
                     context.write(new Text(userId), new IntWritable(1));
                 }

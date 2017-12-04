@@ -11,35 +11,38 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import part1.first_version.Reduce;
 
-// creates a job process that is submitted to the hadoop environment
+/**
+ * Class that creates a job process that is submitted to the hadoop environment
+ * Run: WikiReduce.jar part2.first_version.Main N timestamp1 timestamp2 input
+ * final-output
+ */
 public class Main extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         //
         Job job = Job.getInstance(getConf());
-        job.setJobName("wiki-part2");
-        // the jar where the main class is present in
+        job.setJobName("wiki-part2-first-version");
+
         job.setJarByClass(Main.class);
 
-        // set the data types of the output
+        // Set the data types of the output
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
-        //"2005-12-06T17:44:47Z"
-        job.getConfiguration().set("timestamp1", "2005-12-06T17:44:47Z");
-        //"2006-03-24T02:14:46Z"
-        job.getConfiguration().set("timestamp2", "2006-03-24T02:14:46Z");
-        job.getConfiguration().set("N-value", "10");
+        // Set the configuration using the parameters given by the user
+        job.getConfiguration().set("N-value", args[0]);
+        job.getConfiguration().set("timestamp1", args[1]);
+        job.getConfiguration().set("timestamp2", args[2]);
 
+        // Set the mapper and reducer
         job.setMapperClass(Map.class);
         job.setReducerClass(Reduce.class);
 
+        // Set the input and output file paths based on the input from user
         Path inputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/input" +
-                        "/wiki.txt");
+                (args[3]);
         Path outputFilePath = new Path
-                ("/home/andrei/hadoop-install/HadoopProjects/WikiReduce/data/output/part2_first" +
-                        "-version");
+                (args[4]);
 
         FileInputFormat.addInputPath(job, inputFilePath);
         FileOutputFormat.setOutputPath(job, outputFilePath);
